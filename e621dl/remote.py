@@ -2,6 +2,7 @@
 import os
 from time import sleep
 from timeit import default_timer
+from functools import lru_cache
 
 # Personal Imports
 from e621dl import constants
@@ -75,6 +76,7 @@ def get_known_post(post_id, session):
 
     return response.json()
 
+@lru_cache(maxsize=512, typed=False)
 def get_tag_alias(user_tag, session):
     prefix = ''
 
