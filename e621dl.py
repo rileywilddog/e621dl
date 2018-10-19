@@ -17,7 +17,7 @@ if __name__ == '__main__':
     # Create the requests session that will be used throughout the run.
     with remote.requests_retry_session() as session:
         # Set the user-agent. Requirements are specified at https://e621.net/help/show/api#basics.
-        session.headers['User-Agent'] = f"e621dl (Wulfre) -- Version {constants.VERSION}"
+        session.headers['User-Agent'] = f"e621dl.py/{constants.VERSION} (by Wulfre)"
         
         # Check if a new version is released on github. If so, notify the user.
         if StrictVersion(constants.VERSION) < StrictVersion(remote.get_github_release(session)):
