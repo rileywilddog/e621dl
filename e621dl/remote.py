@@ -39,10 +39,11 @@ def delayed_post(url, payload, session):
     with session.post(url, data = payload) as response:
         elapsed = default_timer() - start
 
-        # If the response took less than 0.5 seconds (only 2 requests are allowed per second as per the e621 API)
-        # Wait for the rest of the 0.5 seconds.
-        if elapsed < 0.5:
-            sleep(0.5 - elapsed)
+        # If the response took less than 1 second
+        # (a hard limit of 2 requests are allowed per second as per the e621 API)
+        # Wait for the rest of the 1 second.
+        if elapsed < 1:
+            sleep(1 - elapsed)
 
         return response
 

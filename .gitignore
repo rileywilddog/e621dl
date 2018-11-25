@@ -55,4 +55,4 @@ dist/
 # Repo Specific
 downloads/
 build.bat
-config.ini
+*config.*

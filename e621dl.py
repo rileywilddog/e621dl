@@ -13,7 +13,6 @@ from e621dl import remote
 
 # This block will only be read if e621dl.py is directly executed as a script. Not if it is imported.
 if __name__ == '__main__':
-
     # Create the requests session that will be used throughout the run.
     with remote.requests_retry_session() as session:
         # Set the user-agent. Requirements are specified at https://e621.net/help/show/api#basics.
@@ -35,74 +34,30 @@ if __name__ == '__main__':
         config = local.get_config()
 
         # Initialize the lists that will be used to filter posts.
-        blacklist = []
         searches = []
 
         # Initialize user configured options in case any are missing.
-        include_md5 = False # The md5 checksum is not appended to file names.
-        default_date = local.get_date(1) # Get posts from one day before execution.
-        default_score = -0x7F_FF_FF_FF # Allow posts of any score to be downloaded.
-        default_favs = 0
-        default_ratings = ['s'] # Allow only safe posts to be downloaded.
+        include_md5 = config['toggles'].get('include_md5', False)
+        default_days = config['default_search'].get('days', 1)
+        default_score = config['default_search'].get('min_score', -0x7F_FF_FF_FF)
+        default_favs = config['default_search'].get('min_favs', 0)
+        default_ratings = config['default_search'].get('ratings', ['s'])
 
-        # Iterate through all sections (lines enclosed in brackets: []).
-        for section in config.sections():
+        blacklist = [remote.get_tag_alias(tag.lower(), session) for tag in config['blacklist']]
 
-            # Get values from the "Other" section. Currently only used for file name appending.
-            if section.lower() == 'other':
-                for option, value in config.items(section):
-                    if option.lower() == 'include_md5':
-                        if value.lower() == 'true':
-                            include_md5 = True
+        for key, value in config['searches'].items():
+            # Get the tags that will be searched for. Tags are aliased to their acknowledged names.
+            section_tags = [remote.get_tag_alias(tag.lower(), session) for tag in value['tags']]
 
-            # Get values from the "Defaults" section. This overwrites the initialized default_* variables.
-            elif section.lower() == 'defaults':
-                for option, value in config.items(section):
-                    if option.lower() in {'days_to_check', 'days'}:
-                        default_date = local.get_date(int(value))
-                    elif option.lower() in {'min_score', 'score'}:
-                        default_score = int(value)
-                    elif option.lower() in {'min_favs', 'favs'}:
-                        default_favs = int(value)
-                    elif option.lower() in {'ratings', 'rating'}:
-                        default_ratings = value.replace(',', ' ').lower().strip().split()
+            # Replace options that are specified by the user.
+            section_date = local.get_date(value.get('days', default_days))
+            section_score = value.get('min_score', default_score)
+            section_favs = value.get('min_favs', default_favs)
+            section_ratings = value.get('ratings', default_ratings)
 
-            # Get values from the "Blacklist" section. Tags are aliased to their acknowledged names.
-            elif section.lower() == 'blacklist':
-                blacklist = [remote.get_tag_alias(tag.lower(), session) for tag in config.get(section, 'tags').replace(',', ' ').lower().strip().split()]
-
-            # If the section name is not one of the above, it is assumed to be the values for a search.
-            else:
-
-                # Initialize the list of tags that will be searched.
-                section_tags = []
-
-                # Default options are set in case the user did not declare any for the specific section.
-                section_date = default_date
-                section_score = default_score
-                section_favs = default_favs
-                section_ratings = default_ratings
-
-                # Go through each option within the section to find search related values.
-                for option, value in config.items(section):
-
-                    # Get the tags that will be searched for. Tags are aliased to their acknowledged names.
-                    if option.lower() in {'tags', 'tag'}:
-                        section_tags = [remote.get_tag_alias(tag.lower(), session) for tag in value.replace(',', ' ').lower().strip().split()]
-
-                    # Overwrite default options if the user has a specific value for the section
-                    elif option.lower() in {'days_to_check', 'days'}:
-                        section_date = local.get_date(int(value))
-                    elif option.lower() in {'min_score', 'score'}:
-                        section_score = int(value)
-                    elif option.lower() in {'min_favs', 'favs'}:
-                        section_favs = int(value)
-                    elif option.lower() in {'ratings', 'rating'}:
-                        section_ratings = value.replace(',', ' ').lower().strip().split()
-
-                # Append the final values that will be used for the specific section to the list of searches.
-                # Note section_tags is a list within a list.
-                searches.append({'directory': section, 'tags': section_tags, 'ratings': section_ratings, 'min_score': section_score, 'min_favs': section_favs, 'earliest_date': section_date})
+            # Append the final values that will be used for the specific section to the list of searches.
+            # Note section_tags is a list within a list.
+            searches.append({'directory': key, 'tags': section_tags, 'ratings': section_ratings, 'min_score': section_score, 'min_favs': section_favs, 'earliest_date': section_date})
 
         for search in searches:
             print('')
