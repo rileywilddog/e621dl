@@ -88,11 +88,11 @@ def get_tag_alias(user_tag, session):
 
     if user_tag[0] == '~':
         prefix = '~'
-        user_tag = user_tag[1:]
+        return prefix+get_tag_alias(user_tag, session)
 
     if user_tag[0] == '-':
         prefix = '-'
-        user_tag = user_tag[1:]
+        return prefix+get_tag_alias(user_tag, session)
 
     url = 'https://e621.net/tag/index.json'
     payload = {'name': user_tag}
