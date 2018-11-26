@@ -1,26 +1,26 @@
 # Internal Imports
-import configparser
 import datetime
 import os
 
 # Personal Imports
 from e621dl import constants
 
+# Vendor Imports
+import yaml
+
 def make_config():
-    with open('config.ini', 'wt', encoding = 'utf_8_sig') as outfile:
+    with open('config.yaml', 'wt', encoding = 'utf-8') as outfile:
         outfile.write(constants.DEFAULT_CONFIG_TEXT)
         print("[i] New default config file created. Please add tag groups to this file.'")
     raise SystemExit
 
 def get_config():
-    config = configparser.ConfigParser()
-
-    if not os.path.isfile('config.ini'):
+    if not os.path.isfile('config.yaml'):
         print("[!] No config file found.")
         make_config()
 
-    with open('config.ini', 'rt', encoding = 'utf_8_sig') as infile:
-        config.read_file(infile)
+    with open('config.yaml', 'rt', encoding = 'utf-8') as infile:
+        config = yaml.load(infile)
 
     return config
 

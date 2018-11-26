@@ -1,40 +1,41 @@
-VERSION = '4.5.1'
+VERSION = '4.6.0'
 
 MAX_RESULTS = 320
 PARTIAL_DOWNLOAD_EXT = 'request'
 
-DEFAULT_CONFIG_TEXT = ''';;;;;;;;;;;;;;
-;; GENERAL  ;;
-;;;;;;;;;;;;;;
+DEFAULT_CONFIG_TEXT = '''toggles:
+    include_md5: false
 
-[Defaults]
-days = 1
-ratings = s
-min_score = 0
-min_favs = 0
+default_search:
+    days: 1
+    min_score: 0
+    min_favs: 0
+    ratings:
+        - s
 
-[Blacklist]
-tags =
+blacklist:
 
-[Other]
-include_md5 = false
+searches:
+    cats:
+        tags:
+            - cat
+            - yellow_fur
+    dogs:
+        tags:
+            - dog
+            - brown_fur
 
-;;;;;;;;;;;;;;;;;;;
-;; SEARCH GROUPS ;;
-;;;;;;;;;;;;;;;;;;;
-
-; New search groups can be created by writing the following. (Do not include semicolons.):
-; [Directory Name]
-; days = 1
-; ratings = s, q, e
-; min_score = -100
-; min_favs = 0
-; tags = tag1, tag2, tag3, ...
-
-; Example:
-; [Cute Cats]
-; days = 30
-; ratings = s
-; min_score = 5
-; min_favs = 20
-; tags = cat, cute'''
+# The most common search structure has already been exemplified, but you may overwrite any of the default search settings for a specific search.
+#
+# searches:
+#   dogs:
+#       days: 30
+#       min_score: 10
+#       min_favs: 10
+#       ratings:
+#           -s
+#           -q
+#           -e
+#       tags:
+#           - dog
+#           - brown_fur'''
