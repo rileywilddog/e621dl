@@ -2,6 +2,7 @@
 import os
 from time import sleep
 from timeit import default_timer
+from functools import lru_cache
 from shutil import copyfileobj
 
 # Personal Imports
@@ -77,6 +78,7 @@ def get_known_post(post_id, session):
 
         return response.json()
 
+@lru_cache(maxsize=512, typed=False)
 def get_tag_alias(user_tag, session):
     prefix = ''
 
@@ -86,11 +88,11 @@ def get_tag_alias(user_tag, session):
 
     if user_tag[0] == '~':
         prefix = '~'
-        user_tag = user_tag[1:]
+        return prefix+get_tag_alias(user_tag, session)
 
     if user_tag[0] == '-':
         prefix = '-'
-        user_tag = user_tag[1:]
+        return prefix+get_tag_alias(user_tag, session)
 
     url = 'https://e621.net/tag/index.json'
     payload = {'name': user_tag}
